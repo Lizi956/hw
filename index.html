@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPA - პროდუქტები</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #app { max-width: 600px; margin: auto; padding: 20px; }
+        .product { cursor: pointer; color: blue; text-decoration: underline; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>პროდუქტების სია</h1>
+        <div id="products"></div>
+        <div id="product-details"></div>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadProducts();
+
+            window.addEventListener("hashchange", () => {
+                const id = window.location.hash.replace("#", "");
+                if (id) {
+                    loadProductDetails(id);
+                } else {
+                    loadProducts();
+                }
+            });
+        });
+
+        function loadProducts() {
+            fetch('https://dummyjson.com/products?limit=5')
+                .then(res => res.json())
+                .then(data => {
+                    const productsDiv = document.getElementById('products');
+                    const detailsDiv = document.getElementById('product-details');
+                    detailsDiv.innerHTML = ""; // Clear details
+                    productsDiv.innerHTML = data.products.map(p => 
+                        `<div class="product" onclick="navigate(${p.id})">${p.title}</div>`
+                    ).join('');
+                });
+        }
+
+        function loadProductDetails(id) {
+            fetch(`https://dummyjson.com/products/${id}`)
+                .then(res => res.json())
+                .then(product => {
+                    const detailsDiv = document.getElementById('product-details');
+                    const productsDiv = document.getElementById('products');
+                    productsDiv.innerHTML = ""; // Clear product list
+                    detailsDiv.innerHTML = `
+                        <h2>${product.title}</h2>
+                        <img src="${product.thumbnail}" width="200" />
+                        <p>${product.description}</p>
+                        <p>ფასი: $${product.price}</p>
+                        <button onclick="goBack()">უკან</button>
+                    `;
+                });
+        }
+
+        function navigate(id) {
+            window.location.hash = id;
+        }
+
+        function goBack() {
+            window.location.hash = "";
+        }
+    </script>
+</body>
+</html>
